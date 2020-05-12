@@ -1,0 +1,13 @@
+package com.example.demo.repository;
+
+import com.example.demo.entity.ArticleEntity;
+
+public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
+
+	@Override
+	public ArticleEntity getArticle(String id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

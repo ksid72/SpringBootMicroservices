@@ -1,0 +1,3 @@
+spring.application.name=artile-app
+spring.jpa.show-sql=true
+spring.h2.console.enabled=true

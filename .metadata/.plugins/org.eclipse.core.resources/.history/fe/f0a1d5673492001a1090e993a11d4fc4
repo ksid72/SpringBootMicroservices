@@ -1,0 +1,61 @@
+package com.example.demo.service;
+
+import java.util.Optional;
+import java.util.logging.Logger;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.controller.ArticleController;
+import com.example.demo.entity.ArticleEntity;
+import com.example.demo.repository.ArticleRepository;
+
+
+@Service
+public class ArticleServiceImpl implements ArticleService{
+	
+	private final static Logger LOGGER = Logger.getLogger(ArticleServiceImpl.class.getName());
+
+     
+    @Autowired
+    ArticleRepository repository;
+     
+   
+     
+//    public ArticleEntity updateArticle(ArticleEntity entity)
+//    {
+//        Optional<ArticleEntity> employee = repository.update(entity);
+//        
+//        repository.
+//         
+//        if(employee.isPresent()) {
+//            return employee.get();
+//        } else {
+//            throw new RecordNotFoundException("No employee record exist for given id");
+//        }
+//    }
+     
+    public ArticleEntity addArticle(ArticleEntity entity)
+    {
+    	
+        Optional<ArticleEntity> articleEntity = Optional.ofNullable(repository.findByStringID(entity.getId()));
+       
+         
+        if(articleEntity.isPresent())
+        {
+                 
+            return articleEntity.get();
+            
+        } else {
+            entity = repository.save(entity);
+             
+            return entity;
+        }
+    }
+
+
+
+	
+     
+   
+}

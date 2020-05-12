@@ -1,0 +1,59 @@
+package com.example.demo.service;
+
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.entity.ArticleEntity;
+import com.example.demo.exception.RecordNotFoundException;
+import com.example.demo.repository.ArticleRepository;
+
+
+@Service
+public class ArticleServiceImpl implements ArticleService{
+     
+    @Autowired
+    ArticleRepository repository;
+     
+   
+     
+//    public ArticleEntity getArticle(Long id) throws RecordNotFoundException
+//    {
+//        Optional<ArticleEntity> employee = repository.findById(id);
+//         
+//        if(employee.isPresent()) {
+//            return employee.get();
+//        } else {
+//            throw new RecordNotFoundException("No employee record exist for given id");
+//        }
+//    }
+     
+    public ArticleEntity addArticle(ArticleEntity entity)
+    {
+        Optional<ArticleEntity> employee = Optional.ofNullable(repository.getArticle(entity.getId()));
+       
+         
+        if(employee.isPresent())
+        {
+        	ArticleEntity newEntity = employee.get();
+//            newEntity.setEmail(entity.getEmail());
+//            newEntity.setFirstName(entity.getFirstName());
+//            newEntity.setLastName(entity.getLastName());
+ 
+            newEntity = repository.save(newEntity);
+             
+            return newEntity;
+        } else {
+            entity = repository.save(entity);
+             
+            return entity;
+        }
+    }
+
+
+
+	
+     
+   
+}

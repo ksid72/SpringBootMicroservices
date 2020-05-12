@@ -1,0 +1,12 @@
+package com.example.demo.dao;
+
+import com.example.demo.entity.ArticleEntity;
+
+public class ArticleDao {
+
+	public void addArticle(ArticleEntity article) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

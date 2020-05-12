@@ -1,0 +1,26 @@
+package com.example.demo.repository;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
+import com.example.demo.entity.ArticleEntity;
+
+public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
+
+	@PersistenceContext
+	EntityManager entityManager;
+
+	@Override
+	public ArticleEntity getArticle(String id) {
+//		Query query = entityManager.createNativeQuery(
+//				"SELECT em.* FROM spring_data_jpa_example.employee as em " + "WHERE em.firstname LIKE ?",
+//				ArticleEntity.class);
+//		
+		Query query = entityManager.createQuery("from ArticleEntity where id ="+id);
+		return (ArticleEntity)query.getSingleResult();
+		
+
+}
+	
+}

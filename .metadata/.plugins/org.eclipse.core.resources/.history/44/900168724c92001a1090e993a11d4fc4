@@ -1,0 +1,225 @@
+package com.example.demo.controller;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.dto.ArticleDTO;
+import com.example.demo.dto.ReadTimeJson;
+import com.example.demo.dto.TimeToRead;
+import com.example.demo.entity.ArticleEntity;
+import com.example.demo.service.ArticleService;
+
+@RestController
+public class ArticleController {
+
+	private final static Logger LOGGER = Logger.getLogger(ArticleController.class.getName());
+
+	@Autowired
+	private ArticleService articleService;
+
+	@GetMapping(value = "/api/articles/{id}")
+	public ResponseEntity<ArticleEntity> getArticle(@PathVariable String id) {
+
+		ArticleEntity result = articleService.getArticle(id);
+
+		return new ResponseEntity<ArticleEntity>(result, HttpStatus.CREATED);
+	}
+
+	@GetMapping(value = "/api/articles")
+	public ResponseEntity<List<ArticleEntity>> getAllArticlesWithPagination(
+			@RequestParam(defaultValue = "0") Integer pageNo, @RequestParam(defaultValue = "10") Integer pageSize,
+			@RequestParam(defaultValue = "id") String sortBy) {
+		List<ArticleEntity> list = articleService.getAllArticles(pageNo, pageSize, sortBy);
+
+		return new ResponseEntity<List<ArticleEntity>>(list, new HttpHeaders(), HttpStatus.OK);
+	}
+
+	@PostMapping(value = "/api/articles")
+	public ResponseEntity<ArticleEntity> addArticle(@Valid @RequestBody ArticleDTO articleDTO) {
+
+		if (articleDTO.getTitle() != null && articleDTO.getBody() != null && articleDTO.getDescription() != null) {
+
+			if (articleDTO.getTitle().length() < 1 || articleDTO.getBody().length() < 1
+					|| articleDTO.getDescription().length() < 1) {
+
+				return new ResponseEntity<ArticleEntity>(HttpStatus.BAD_REQUEST);
+
+			}
+
+			ArticleEntity entity = new ArticleEntity();
+			entity.setTitle(articleDTO.getTitle());
+			entity.setBody(articleDTO.getBody());
+			entity.setDescription(articleDTO.getDescription());
+			// adding tags
+			entity.setTags(articleDTO.getTags());
+			// adding created Date
+			entity.setCreatedAt(new Date());
+			// adding update Date
+			entity.setUpdatedAt(new Date());
+			// adding default favorite as false
+			entity.setFavorited(false);
+			// adding default count as 0
+			entity.setFavoritesCount(0);
+
+			ArticleEntity result = articleService.addArticle(entity);
+
+			return new ResponseEntity<ArticleEntity>(result, HttpStatus.CREATED);
+		}
+
+		return new ResponseEntity<ArticleEntity>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+	}
+
+	@PutMapping(value = "/api/articles/{id}")
+	public ResponseEntity<ArticleEntity> updateArticle(@RequestBody ArticleDTO articleDTO, @PathVariable String id) {
+
+		if (articleDTO.getTitle() != null || articleDTO.getBody() != null || articleDTO.getDescription() != null
+				|| articleDTO.getTags() != null) {
+
+			ArticleEntity entity = articleService.getArticle(id);
+
+			if (articleDTO.getTitle() != null && articleDTO.getTitle().length() > 0) {
+				entity.setSlug(entity.getTitle());
+				entity.setTitle(articleDTO.getTitle());
+			}
+
+			if (articleDTO.getBody() != null && articleDTO.getBody().length() > 0) {
+				entity.setSlug(entity.getBody());
+				entity.setBody(articleDTO.getBody());
+			}
+
+			if (articleDTO.getDescription() != null && articleDTO.getDescription().length() > 0) {
+				entity.setSlug(entity.getDescription());
+				entity.setDescription(articleDTO.getDescription());
+			}
+
+			if (articleDTO.getTags() != null && articleDTO.getTags().length > 0) {
+				entity.setSlug(Arrays.toString(entity.getTags()));
+				entity.setTags(articleDTO.getTags());
+			}
+
+			ArticleEntity result = articleService.addArticle(entity);
+
+			return new ResponseEntity<ArticleEntity>(result, HttpStatus.CREATED);
+		}
+
+		return new ResponseEntity<ArticleEntity>(HttpStatus.BAD_REQUEST);
+	}
+
+	@DeleteMapping(value = "/api/articles/{id}")
+	public ResponseEntity<ArticleEntity> deleteArticle(@PathVariable String id) {
+
+		ArticleEntity entity = articleService.getArticle(id);
+
+		articleService.deleteArticle(entity);
+
+		return new ResponseEntity<ArticleEntity>(HttpStatus.CREATED);
+
+	}
+	
+	/*
+	 
+	 {
+		"title": "How to learn Spring Booot",
+		"description": "Ever wonder how?",
+		"body": "You have to believe",
+		
+	}
+	 
+	 */
+	/*
+	 * adding all characters from title,description and body will provide total no. of character to read
+	 */
+	
+	@Value("${spring.human.reading.speed}")
+	int readingSpeed;
+	
+	@GetMapping(value="/api/articles/{id}/timetoread")
+	public ReadTimeJson articleReadTime(@PathVariable String id) {
+		
+		ArticleEntity result = articleService.getArticle(id);
+		int lengthOfCharacters=0;
+		
+		if(null!=result) {
+			lengthOfCharacters = result.getTitle().length() + result.getDescription().length() + result.getBody().length();
+		}
+		
+		int secondsToReadArticle = lengthOfCharacters/readingSpeed;
+		
+		
+		ReadTimeJson readTimeJson = new ReadTimeJson();
+		readTimeJson.setArticleId(id);
+		
+		TimeToRead timeToRead=new TimeToRead();
+		timeToRead.setMins(secondsToReadArticle/60);
+		timeToRead.setSeconds(secondsToReadArticle%60);
+		readTimeJson.setTimeToRead(timeToRead);
+		
+		return readTimeJson;
+		
+	}
+	
+	@GetMapping(value="/api/articles/tags")
+	public void getTagOccurance() {
+		List<ArticleEntity> list = articleService.getAllArticles();
+		
+	
+		
+		List<String[]> tagList = list.stream().map(ArticleEntity::getTags).collect(Collectors.toList());
+		
+		Iterator itr=tagList.iterator();
+		int count=1;
+		HashMap<String ,Integer> occuranceMap=new HashMap<>();
+		while(itr.hasNext()){
+			
+			String[] arr = (String[])itr.next();
+			LOGGER.info("222222"+arr);
+			for(int i = 0;i < arr.length; i++) {
+				if( occuranceMap!=null && occuranceMap.get(arr[i])!=null) {
+					
+					Integer value=occuranceMap.get(arr[i]);
+					occuranceMap.put(arr[i], value+1);
+					
+				}
+				else
+				occuranceMap.put(arr[i], count);
+			}
+			
+			
+			
+		}
+		
+		//String[] array = {"name1","name2","name3","name4", "name5", "name2"};
+//		Arrays.stream(array)
+//		      .collect(Collectors.groupingBy(s -> s))
+//		      .forEach((k, v) -> System.out.println(k+" "+v.size()));
+		
+//		tagList.forEach(name->System.out.println(name));
+//		
+		LOGGER.info("111111"+occuranceMap);
+		
+
+	}
+
+}

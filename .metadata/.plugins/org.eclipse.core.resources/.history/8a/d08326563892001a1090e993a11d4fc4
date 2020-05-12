@@ -1,0 +1,13 @@
+package com.example.demo.service;
+
+import com.example.demo.entity.ArticleEntity;
+
+public interface ArticleService {
+	
+	public ArticleEntity addArticle(ArticleEntity article);
+	
+	public ArticleEntity getArticle(String id);
+
+	public List<ArticleEntity> getAllArticles();
+
+}

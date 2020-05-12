@@ -1,0 +1,27 @@
+package com.example.demo.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.dao.ArticleDao;
+import com.example.demo.entity.ArticleEntity;
+
+@Service("articleService")
+public class ArticleServiceImpl implements ArticleService{
+
+	@Autowired
+	ArticleDao articleDao;
+
+	@Override
+	public int addArticle(ArticleEntity article) {
+		ArticleEntity entity=articleDao.addArticle(article);
+		return entity.getId();
+	}
+
+	@Override
+	public ArticleEntity getArticle(String id) {
+		ArticleEntity entity = articleDao.getArticle(id);
+		return entity;
+	}
+
+}

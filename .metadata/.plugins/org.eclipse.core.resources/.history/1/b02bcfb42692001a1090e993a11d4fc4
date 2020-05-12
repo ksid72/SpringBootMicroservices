@@ -1,0 +1,34 @@
+package com.example.demo.repository;
+
+import java.util.logging.Logger;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
+import org.springframework.stereotype.Repository;
+
+import com.example.demo.entity.ArticleEntity;
+import com.example.demo.service.ArticleServiceImpl;
+
+@Repository
+public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
+	
+	private final static Logger LOGGER = Logger.getLogger(ArticleServiceImpl.class.getName());
+
+
+	@PersistenceContext
+	EntityManager entityManager;
+
+	@Override
+	public ArticleEntity getArticle(String id) {	
+		
+		LOGGER.info("33333333"+id);
+		Query query = entityManager.createQuery("select a from ArticleEntity a where a.id = :id_var");
+		query.setParameter("id_var", id);
+		return (ArticleEntity)query.getSingleResult();
+		
+
+}
+	
+}

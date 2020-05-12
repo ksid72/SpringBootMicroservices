@@ -1,0 +1,71 @@
+package com.example.demo.controller;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.Bean.ArticleDTO;
+import com.example.demo.entity.ArticleEntity;
+import com.example.demo.service.ArticleService;
+
+@RestController
+public class ArticleController {
+
+	private final static Logger LOGGER = Logger.getLogger(ArticleController.class.getName());
+
+	@Autowired
+	private ArticleService articleService;
+
+	@PostMapping(value = "/api/articles")
+	public ResponseEntity<ArticleEntity> addArticle(@Valid @RequestBody ArticleDTO articleDTO) {
+
+		if (articleDTO.getTitle() != null && articleDTO.getBody() != null && articleDTO.getDescription() != null) {
+
+			if (articleDTO.getTitle().length() < 1 || articleDTO.getBody().length() < 1
+					|| articleDTO.getDescription().length() < 1) {
+
+				return new ResponseEntity<ArticleEntity>(HttpStatus.BAD_REQUEST);
+
+			}
+
+			ArticleEntity entity = new ArticleEntity();
+			entity.setTitle(articleDTO.getTitle());
+			entity.setBody(articleDTO.getBody());
+			entity.setDescription(articleDTO.getDescription());
+			// adding tags
+			entity.setTags(articleDTO.getTags());
+			// adding created Date
+			entity.setCreatedAt(new Date());
+			// adding update Date
+			entity.setUpdatedAt(new Date());
+			// adding default favorite as false
+			entity.setFavorited(false);
+			// adding default count as 0
+			entity.setFavoritesCount(0);
+
+			ArticleEntity result = articleService.addArticle(entity);
+
+			return new ResponseEntity<ArticleEntity>(result, HttpStatus.CREATED);
+		}
+
+		return new ResponseEntity<ArticleEntity>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+	}
+
+	
+
+}

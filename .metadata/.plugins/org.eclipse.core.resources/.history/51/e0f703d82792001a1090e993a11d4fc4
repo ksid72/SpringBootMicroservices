@@ -1,0 +1,9 @@
+package com.example.demo.repository;
+
+import com.example.demo.entity.ArticleEntity;
+
+public interface ArticleRepositoryCustom {
+	
+	public ArticleEntity getArticle(String id);
+
+}

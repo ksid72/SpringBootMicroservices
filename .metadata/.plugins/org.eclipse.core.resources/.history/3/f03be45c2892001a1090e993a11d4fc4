@@ -1,0 +1,48 @@
+package com.example.demo.controller;
+
+import java.util.Date;
+import java.util.logging.Logger;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.Bean.ArticleDTO;
+import com.example.demo.entity.ArticleEntity;
+import com.example.demo.service.ArticleService;
+
+@RestController
+public class ArticleController {
+
+	private final static Logger LOGGER = Logger.getLogger(ArticleController.class.getName());
+
+	@Autowired
+	private ArticleService articleService;
+
+	@PostMapping(value = "/api/articles")
+	public ResponseEntity<ArticleEntity> addArticle(@RequestBody ArticleDTO articleDTO) {
+
+		ArticleEntity entity = new ArticleEntity();
+		entity.setTitle(articleDTO.getTitle());
+		entity.setBody(articleDTO.getBody());
+		entity.setDescription(articleDTO.getDescription());
+		// adding tags
+		entity.setTags(articleDTO.getTags());
+		// adding created Date
+		entity.setCreatedAt(new Date());
+		// adding update Date
+		entity.setUpdatedAt(new Date());
+		// adding default favorite as false
+		entity.setFavorited(false);
+		// adding default count as 0
+		entity.setFavoritesCount(0);
+
+		ArticleEntity result = articleService.addArticle(entity);
+
+		return new ResponseEntity<ArticleEntity>(result, HttpStatus.CREATED);
+	}
+
+}

@@ -1,0 +1,56 @@
+package com.example.demo.controller;
+
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.Bean.ArticleDTO;
+import com.example.demo.entity.ArticleEntity;
+import com.example.demo.helper.HelperUtility;
+import com.example.demo.service.ArticleService;
+
+
+
+@RestController
+public class ArticleController {
+	
+	@Autowired
+	private ArticleService articleService;
+	
+	@PostMapping(value="/api/articles")
+	public ResponseEntity<ArticleEntity> addArticle(@RequestBody ArticleDTO articleDTO){
+		
+		if(articleDTO.getTitle()!=null && articleDTO.getBody()!=null && articleDTO.getDescription()!=null ) {
+			
+			ArticleEntity entity=new ArticleEntity(articleDTO.getTitle(),articleDTO.getBody(),articleDTO.getDescription());
+			
+			//adding random Id		
+			entity.setId(HelperUtility.generateRandomChars());
+			//adding created Date
+			entity.setCreatedAt(new Date());
+			//adding update Date
+			entity.setUpdatedAt(new Date());
+			
+			articleService.addArticle(entity);
+		}
+		else {
+			new ResponseEntity<ArticleEntity>(HttpStatus.BAD_REQUEST);
+		}
+		
+		return new ResponseEntity<ArticleEntity>(HttpStatus.OK);
+	}
+
+}
+
+
+//{
+//"title": "How to learn Spring Booot",
+//"description": "Ever wonder how?",
+//"body": "You have to believe",
+//"tags": ["java", "Spring Boot", "tutorial"]
+//}

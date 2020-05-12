@@ -1,0 +1,9 @@
+package com.example.demo.dao;
+
+import com.example.demo.entity.ArticleEntity;
+
+public interface ArticleDao {
+
+	public void addArticle(ArticleEntity article);
+
+}
